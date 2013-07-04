@@ -24,7 +24,7 @@ into a two-step process:
 the idea being to not evaluate dynamic args when no listeners were
 active for the given path and priority.
 
-So far this experiment has not what I would call a resounding success,
+So far this experiment has not been what I would call a resounding success,
 as the overhead involved in splitting T into M and T is about 2x
 slower than the original:
 
