@@ -153,7 +153,6 @@ func BenchmarkOtherListeners(b *testing.B) {
 		Register(l)
 		defer Remove(l)
 	}
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if m, ok := M("/elsewhere", Info); ok {
 			T(m, "/elsewhere", Info, "%d\n", i)
@@ -167,7 +166,6 @@ func BenchmarkFirstListener(b *testing.B) {
 		Register(l)
 		defer Remove(l)
 	}
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if m, ok := M("path1", Info); ok {
 			T(m, "path1", Info, "%d\n", i)
@@ -181,7 +179,6 @@ func BenchmarkSecondListener(b *testing.B) {
 		Register(l)
 		defer Remove(l)
 	}
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if m, ok := M("path2", Info); ok {
 			T(m, "path2", Info, "%d\n", i)
@@ -195,7 +192,6 @@ func BenchmarkBothListeners(b *testing.B) {
 		Register(l)
 		defer Remove(l)
 	}
-	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if m, ok := M("/trace/a/b", Info); ok {
 			T(m, "/trace/a/b", Info, "%d\n", i)
