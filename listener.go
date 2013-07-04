@@ -1,28 +1,23 @@
 package trace
 
 import (
-	"sync"
 	"time"
 )
 
-type Listeners struct {
-	*sync.RWMutex
-	set []*Listener // registered listeners
-}
-
-func NewListeners(set ...*Listener) *Listeners {
-	return &Listeners{
-		RWMutex: new(sync.RWMutex),
-		set:     set,
-	}
-}
+type ListenerFn func(t time.Time, path string, priority Priority, msg string)
 
 type Listener struct {
-	Fn func(time.Time, string, ...interface{})
-	P  string
-	N  []Priority
+	Id     string   // Unique identifier for listener
+	Prefix string   // Call Fn for paths that start with this Prefix
+	Min    Priority // Call Fn at this Priority or above
+	Fn     ListenerFn
 }
 
-func NewListener(fn func(time.Time, string, ...interface{}), p string, n ...Priority) *Listener {
-	return &Listener{Fn: fn, P: p, N: n}
+func NewListener(id, prefix string, min Priority, fn ListenerFn) *Listener {
+	return &Listener{
+		Id:     id,
+		Prefix: prefix,
+		Min:    min,
+		Fn:     fn,
+	}
 }
