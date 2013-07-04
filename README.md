@@ -48,7 +48,7 @@ However, I'm not exactly following the structure of the original
 library and it may be I'm losing cycles in other parts of the
 implementation.
 
-That said, I am still hopeful that time and memorysavings can be
+That said, I am still hopeful that time and memory savings can be
 realized in the case where one is logging large amounts of data, e.g.,
 Trace level logging of an a large data structure.
 
@@ -81,4 +81,4 @@ Listeners should be removed when they are no longer needed:
 
 	trace.Remove(listener)
 
-Note that multiple goroutines may call a listenerFn at a time.
+Note that multiple goroutines may call a trace.ListenerFn at a time.
