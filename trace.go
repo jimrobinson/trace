@@ -1,7 +1,6 @@
 package trace
 
 import (
-	"fmt"
 	"strings"
 	"sync"
 	"time"
@@ -64,9 +63,8 @@ func M(path string, priority Priority) (match []*Listener, ok bool) {
 func T(match []*Listener, path string, priority Priority, format string, args ...interface{}) {
 	if match != nil {
 		now := time.Now()
-		msg := fmt.Sprintf(format, args...)
 		for _, m := range match {
-			m.Fn(now, path, priority, msg)
+			m.Fn(now, path, priority, format, args...)
 		}
 	}
 }

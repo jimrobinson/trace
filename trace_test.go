@@ -1,6 +1,7 @@
 package trace
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -15,7 +16,7 @@ type test struct {
 	expectedMsg string
 }
 
-func xTestMT(t *testing.T) {
+func TestMT(t *testing.T) {
 	testData := []test{
 		test{
 			path:       "trace",
@@ -68,9 +69,9 @@ func xTestMT(t *testing.T) {
 	var called bool
 	var seenMsg string
 
-	handlerFn := func(t time.Time, path string, prio Priority, msg string) {
+	handlerFn := func(t time.Time, path string, prio Priority, format string, args ...interface{}) {
 		called = true
-		seenMsg = msg
+		seenMsg = fmt.Sprintf(format, args...)
 	}
 
 	listener := NewListener("test", "trace", Info, handlerFn)
@@ -110,7 +111,7 @@ func xTestMT(t *testing.T) {
 func TestEmptyPath(t *testing.T) {
 	seen := false
 
-	handlerFn := func(t time.Time, p string, n Priority, msg string) {
+	handlerFn := func(t time.Time, p string, n Priority, format string, args ...interface{}) {
 		seen = true
 	}
 
@@ -127,7 +128,7 @@ func TestEmptyPath(t *testing.T) {
 	}
 }
 
-func handlerFunc(t time.Time, p string, n Priority, msg string) {
+func handlerFunc(t time.Time, p string, n Priority, format string, args ...interface{}) {
 }
 
 func BenchmarkFunctionCall(b *testing.B) {

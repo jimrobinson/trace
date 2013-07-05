@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-type ListenerFn func(t time.Time, path string, priority Priority, msg string)
+type ListenerFn func(t time.Time, path string, priority Priority, format string, args ...interface{})
 
 type Listener struct {
 	Id     string   // Unique identifier for listener
