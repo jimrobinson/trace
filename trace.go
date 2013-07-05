@@ -6,16 +6,6 @@ import (
 	"time"
 )
 
-type Priority uint8
-
-const (
-	Trace Priority = iota
-	Debug
-	Info
-	Warn
-	Error
-)
-
 var lock = new(sync.RWMutex)
 var listeners = make([]*Listener, 0)
 
