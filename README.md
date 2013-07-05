@@ -24,16 +24,16 @@ into a two-step process:
 the idea being to not evaluate dynamic args when no listeners were
 active for the given path and priority.
 
-So far this experiment has not been what I would call a resounding success,
-as the overhead involved in splitting T into M and T is about 2x
-slower than the original:
+So far this experiment has not been what I would call a resounding
+success, as the overhead involved in splitting T into M and T is a
+little under 2x slower than the original:
 
-	BenchmarkFunctionCall	2000000000	         0.63 ns/op
-	BenchmarkNoListeners	20000000	        93.8  ns/op
-	BenchmarkOtherListeners	10000000	       229    ns/op
-	BenchmarkFirstListener	 5000000	       628    ns/op
-	BenchmarkSecondListener	 5000000	       623    ns/op
-	BenchmarkBothListeners	 5000000	       637    ns/op
+       BenchmarkFunctionCall	2000000000	         0.63 ns/op
+       BenchmarkNoListeners	20000000	        83.8  ns/op
+       BenchmarkOtherListeners	10000000	       217    ns/op
+       BenchmarkFirstListener	 5000000	       605    ns/op
+       BenchmarkSecondListener	 5000000	       606    ns/op
+       BenchmarkBothListeners	 5000000	       615    ns/op
 
 compared to the original library:
 

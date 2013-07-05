@@ -17,36 +17,6 @@ const (
 	Error
 )
 
-// ListenerHandle provides a method to remove a Listener from the registry
-type ListenerHandle struct {
-	i      int
-	active bool
-}
-
-// Remove uninstalls a Listener
-func (h *ListenerHandle) Remove() {
-	lock.Lock()
-	defer lock.Unlock()
-
-	if !h.active {
-		return
-	}
-	h.active = false
-
-	n := len(listeners)
-	if h.i == 0 {
-		if n > 1 {
-			listeners = listeners[1:]
-		} else {
-			listeners = []*Listener{}
-		}
-	} else if h.i == n {
-		listeners = listeners[0:n]
-	} else {
-		listeners = append(listeners[0:h.i], listeners[h.i+1:]...)
-	}
-}
-
 var lock = new(sync.RWMutex)
 var listeners = make([]*Listener, 0)
 
@@ -98,5 +68,35 @@ func T(match []*Listener, path string, priority Priority, format string, args ..
 		for _, m := range match {
 			m.Fn(now, path, priority, msg)
 		}
+	}
+}
+
+// ListenerHandle provides a method to remove a Listener from the registry
+type ListenerHandle struct {
+	i      int
+	active bool
+}
+
+// Remove uninstalls a Listener
+func (h *ListenerHandle) Remove() {
+	lock.Lock()
+	defer lock.Unlock()
+
+	if !h.active {
+		return
+	}
+	h.active = false
+
+	n := len(listeners)
+	if h.i == 0 {
+		if n > 1 {
+			listeners = listeners[1:]
+		} else {
+			listeners = []*Listener{}
+		}
+	} else if h.i == n {
+		listeners = listeners[0:n]
+	} else {
+		listeners = append(listeners[0:h.i], listeners[h.i+1:]...)
 	}
 }
