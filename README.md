@@ -24,19 +24,21 @@ into a two-step process:
 the idea being to not evaluate dynamic args when no listeners were
 active for the given path and priority.
 
-So far this experiment has not been what I would call a resounding
+Initially the experiment was not been what I would call a resounding
 success, as the overhead involved in splitting T into M and T is a
 little under 2x slower than the original:
 
-       BenchmarkFunctionCall	2000000000	         0.63 ns/op
-       BenchmarkNoListeners	20000000	        83.8  ns/op
-       BenchmarkOtherListeners	10000000	       217    ns/op
-       BenchmarkFirstListener	 5000000	       605    ns/op
-       BenchmarkSecondListener	 5000000	       606    ns/op
-       BenchmarkBothListeners	 5000000	       615    ns/op
+	github.com/jimrobinson/trace:
+	BenchmarkFunctionCall	2000000000	         0.63 ns/op
+	BenchmarkNoListeners	20000000	        83.8  ns/op
+	BenchmarkOtherListeners	10000000	       217    ns/op
+	BenchmarkFirstListener	 5000000	       605    ns/op
+	BenchmarkSecondListener	 5000000	       606    ns/op
+	BenchmarkBothListeners	 5000000	       615    ns/op
 
 compared to the original library:
 
+	github.com/seehuhn/trace:
 	BenchmarkFunctionCall	2000000000	         0.96 ns/op
 	BenchmarkNoListeners	20000000	        84.3  ns/op
 	BenchmarkOtherListeners	10000000	       188    ns/op
@@ -44,13 +46,33 @@ compared to the original library:
 	BenchmarkSecondListener	 5000000	       373    ns/op
 	BenchmarkBothListeners	 5000000	       381    ns/op
 
-However, I'm not exactly following the structure of the original
-library and it may be I'm losing cycles in other parts of the
-implementation.
+Interestingly enough, changing my implementation to pass the
+formatting string and args directly to the listener brings the numbers
+back into line with the original implementation:
 
-That said, I am still hopeful that time and memory savings can be
-realized in the case where one is logging large amounts of data, e.g.,
-Trace level logging of an a large data structure.
+	github.com/jimrobinson/trace deferred formatting:
+	BenchmarkFunctionCall	500000000	         6.71 ns/op
+	BenchmarkNoListeners	20000000	        81.5  ns/op
+	BenchmarkOtherListeners	10000000	       218    ns/op
+	BenchmarkFirstListener	 5000000	       321    ns/op
+	BenchmarkSecondListener	 5000000	       323    ns/op
+	BenchmarkBothListeners	 5000000	       329    ns/op
+
+But of course that change drops the actual evaluation of the format
+and args from the benchmark.  Making the same changes to the original
+library brings similar improvements:
+
+	github.com/seehuhn/trace deferred formatting:
+	BenchmarkFunctionCall	200000000	         9.45 ns/op
+	BenchmarkNoListeners	20000000	        84.3  ns/op
+	BenchmarkOtherListeners	10000000	       213    ns/op
+	BenchmarkFirstListener	10000000	       206    ns/op
+	BenchmarkSecondListener	10000000	       205    ns/op
+	BenchmarkBothListeners	10000000	       225    ns/op
+
+I am still hopeful that time and memory savings can be realized in the
+case where one is logging large amounts of data, e.g., Trace level
+logging of an a large data structure.
 
 Usage
 -----
