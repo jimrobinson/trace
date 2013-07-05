@@ -81,7 +81,6 @@ Register a trace.Listener and then call trace.M and trace.T to test
 for listener and to call the listeners:
 
 	import "github.com/jimrobinson/trace"
-	import "log"
 
 	...
 		if m, ok := trace.M(path, priority); ok {
@@ -90,7 +89,9 @@ for listener and to call the listeners:
 	...
 
 To install a listener, define a trace.ListenerFn and register it:
+        import "log"
 
+        ...
 	listenerFn := func(t time.Time, path string, priority trace.Priority, msg string) {
 		log.Println(msg)
 	}
@@ -98,6 +99,7 @@ To install a listener, define a trace.ListenerFn and register it:
 	listener := NewListener("myListenerId", "a/b/c", trace.Error, listenerFn)
 
 	handle := trace.Register(listener)
+        ...
 
 Listeners should be removed when they are no longer needed:
 
