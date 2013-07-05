@@ -25,50 +25,20 @@ the idea being to not evaluate dynamic args when no listeners were
 active for the given path and priority.
 
 Initially the experiment was not been what I would call a resounding
-success, as the overhead involved in splitting T into M and T is a
-little under 2x slower than the original:
+success, as the overhead involved in splitting T into M and T is
+around 2x slower than the original:
 
 	github.com/jimrobinson/trace:
-	BenchmarkFunctionCall	2000000000	         0.63 ns/op
-	BenchmarkNoListeners	20000000	        83.8  ns/op
-	BenchmarkOtherListeners	10000000	       217    ns/op
-	BenchmarkFirstListener	 5000000	       605    ns/op
-	BenchmarkSecondListener	 5000000	       606    ns/op
-	BenchmarkBothListeners	 5000000	       615    ns/op
+	BenchmarkFunctionCall	500000000	         6.64 ns/op
+	BenchmarkNoListeners	20000000	        82.7 ns/op
+	BenchmarkOtherListeners	10000000	       247 ns/op
+	BenchmarkFirstListener	 5000000	       499 ns/op
+	BenchmarkSecondListener	 5000000	       500 ns/op
+	BenchmarkBothListeners	 5000000	       569 ns/op
 
-compared to the original library:
-
-	github.com/seehuhn/trace:
-	BenchmarkFunctionCall	2000000000	         0.96 ns/op
-	BenchmarkNoListeners	20000000	        84.3  ns/op
-	BenchmarkOtherListeners	10000000	       188    ns/op
-	BenchmarkFirstListener	 5000000	       374    ns/op
-	BenchmarkSecondListener	 5000000	       373    ns/op
-	BenchmarkBothListeners	 5000000	       381    ns/op
-
-Interestingly enough, changing my implementation to pass the
-formatting string and args directly to the listener brings the numbers
-back into line with the original implementation:
-
-	github.com/jimrobinson/trace deferred formatting:
-	BenchmarkFunctionCall	500000000	         6.71 ns/op
-	BenchmarkNoListeners	20000000	        81.5  ns/op
-	BenchmarkOtherListeners	10000000	       218    ns/op
-	BenchmarkFirstListener	 5000000	       321    ns/op
-	BenchmarkSecondListener	 5000000	       323    ns/op
-	BenchmarkBothListeners	 5000000	       329    ns/op
-
-But of course that change drops the actual evaluation of the format
-and args from the benchmark.  Making the same changes to the original
-library brings similar improvements:
-
-	github.com/seehuhn/trace deferred formatting:
-	BenchmarkFunctionCall	200000000	         9.45 ns/op
-	BenchmarkNoListeners	20000000	        84.3  ns/op
-	BenchmarkOtherListeners	10000000	       213    ns/op
-	BenchmarkFirstListener	10000000	       206    ns/op
-	BenchmarkSecondListener	10000000	       205    ns/op
-	BenchmarkBothListeners	10000000	       225    ns/op
+Note that this implementation defers evaluation of the format and args
+to the Listener, raising the cost of having multiple Listeners in both
+memory and cpu cycles.
 
 I am still hopeful that time and memory savings can be realized in the
 case where one is logging large amounts of data, e.g., Trace level
@@ -86,7 +56,7 @@ for listener and to call the listeners:
 		traceId := "github.com/jimrobinson/xml/xmlbase"
 	...
 		if m, ok := trace.M(traceId, trace.Info); ok {
-			trace.T(m, traceId, trace.Info, "got %s %d", arg1, arg2)
+			trace.T(m, "got %s %d", arg1, arg2)
 		}
 	...
 

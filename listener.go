@@ -21,3 +21,13 @@ func NewListener(id, prefix string, min Priority, fn ListenerFn) *Listener {
 		Fn:     fn,
 	}
 }
+
+type ListenerState struct {
+	Path     string
+	Priority Priority
+	Fn       ListenerFn
+}
+
+func NewListenerState(path string, priority Priority, listener *Listener) ListenerState {
+	return ListenerState{Path: path, Priority: priority, Fn: listener.Fn}
+}

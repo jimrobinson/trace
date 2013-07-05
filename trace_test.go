@@ -84,7 +84,7 @@ func TestMT(t *testing.T) {
 		}
 
 		if m, ok := M(run.path, run.prio); ok {
-			T(m, run.path, run.prio, run.tmpl, run.args...)
+			T(m, run.tmpl, run.args...)
 		}
 
 		if called != run.shouldCall {

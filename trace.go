@@ -30,7 +30,7 @@ func Register(l *Listener) *ListenerHandle {
 // M searches for any Listener matching the specified path and
 // priority level.  When ok is true the returned match should be
 // returned to the library via T or D.
-func M(path string, priority Priority) (match []*Listener, ok bool) {
+func M(path string, priority Priority) (match []ListenerState, ok bool) {
 	lock.RLock()
 	defer lock.RUnlock()
 
@@ -38,7 +38,7 @@ func M(path string, priority Priority) (match []*Listener, ok bool) {
 		return
 	}
 
-	match = make([]*Listener, 0, len(listeners))
+	match = make([]ListenerState, 0, len(listeners))
 	npath := len(path)
 
 	for _, l := range listeners {
@@ -53,18 +53,18 @@ func M(path string, priority Priority) (match []*Listener, ok bool) {
 				continue
 			}
 		}
-		match = append(match, l)
+		match = append(match, NewListenerState(path, priority, l))
 	}
 
 	return match, len(match) > 0
 }
 
 // T calls each match Listener.Fn.
-func T(match []*Listener, path string, priority Priority, format string, args ...interface{}) {
+func T(match []ListenerState, format string, args ...interface{}) {
 	if match != nil {
 		now := time.Now()
 		for _, m := range match {
-			m.Fn(now, path, priority, format, args...)
+			m.Fn(now, m.Path, m.Priority, format, args...)
 		}
 	}
 }
