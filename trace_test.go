@@ -74,7 +74,7 @@ func xTestMT(t *testing.T) {
 	}
 
 	listener := NewListener("test", "trace", Info, handlerFn)
-	Register(listener)
+	handle := Register(listener)
 
 	tryOne := func(idx int, run test) {
 		called = false
@@ -97,7 +97,7 @@ func xTestMT(t *testing.T) {
 		tryOne(k, run)
 	}
 
-	Remove(listener)
+	handle.Remove()
 
 	tryOne(-1, test{
 		path:       "trace",
@@ -115,8 +115,8 @@ func TestEmptyPath(t *testing.T) {
 	}
 
 	listener := NewListener("test", "", Info, handlerFn)
-	Register(listener)
-	defer Remove(listener)
+	handle := Register(listener)
+	defer handle.Remove()
 
 	if m, ok := M("test", Info); ok {
 		T(m, "test", Info, "hello")
@@ -150,8 +150,8 @@ func BenchmarkNoListeners(b *testing.B) {
 func BenchmarkOtherListeners(b *testing.B) {
 	for _, path := range []string{"path1", "path2"} {
 		l := NewListener(path, path, Info, handlerFunc)
-		Register(l)
-		defer Remove(l)
+		handle := Register(l)
+		defer handle.Remove()
 	}
 	for i := 0; i < b.N; i++ {
 		if m, ok := M("/elsewhere", Info); ok {
@@ -163,8 +163,8 @@ func BenchmarkOtherListeners(b *testing.B) {
 func BenchmarkFirstListener(b *testing.B) {
 	for _, path := range []string{"path1", "path2"} {
 		l := NewListener(path, path, Info, handlerFunc)
-		Register(l)
-		defer Remove(l)
+		handle := Register(l)
+		defer handle.Remove()
 	}
 	for i := 0; i < b.N; i++ {
 		if m, ok := M("path1", Info); ok {
@@ -176,8 +176,8 @@ func BenchmarkFirstListener(b *testing.B) {
 func BenchmarkSecondListener(b *testing.B) {
 	for _, path := range []string{"path1", "path2"} {
 		l := NewListener(path, path, Info, handlerFunc)
-		Register(l)
-		defer Remove(l)
+		handle := Register(l)
+		defer handle.Remove()
 	}
 	for i := 0; i < b.N; i++ {
 		if m, ok := M("path2", Info); ok {
@@ -189,8 +189,8 @@ func BenchmarkSecondListener(b *testing.B) {
 func BenchmarkBothListeners(b *testing.B) {
 	for _, path := range []string{"/trace", "/trace/a"} {
 		l := NewListener(path, path, Info, handlerFunc)
-		Register(l)
-		defer Remove(l)
+		handle := Register(l)
+		defer handle.Remove()
 	}
 	for i := 0; i < b.N; i++ {
 		if m, ok := M("/trace/a/b", Info); ok {

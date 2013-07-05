@@ -17,37 +17,45 @@ const (
 	Error
 )
 
+// ListenerHandle provides a method to remove a Listener from the registry
+type ListenerHandle struct {
+	i      int
+	active bool
+}
+
+// Remove uninstalls a Listener
+func (h *ListenerHandle) Remove() {
+	lock.Lock()
+	defer lock.Unlock()
+
+	if !h.active {
+		return
+	}
+	h.active = false
+
+	n := len(listeners)
+	if h.i == 0 {
+		if n > 1 {
+			listeners = listeners[1:]
+		} else {
+			listeners = []*Listener{}
+		}
+	} else if h.i == n {
+		listeners = listeners[0:n]
+	} else {
+		listeners = append(listeners[0:h.i], listeners[h.i+1:]...)
+	}
+}
+
 var lock = new(sync.RWMutex)
 var listeners = make([]*Listener, 0)
 
 // Register installs a new Listener
-func Register(l *Listener) {
+func Register(l *Listener) *ListenerHandle {
 	lock.Lock()
+	defer lock.Unlock()
 	listeners = append(listeners, l)
-	lock.Unlock()
-}
-
-// Remove uninstalls the specified Listener
-func Remove(l *Listener) {
-	lock.Lock()
-	n := len(listeners)
-	for i, v := range listeners {
-		if v.Id != l.Id {
-			continue
-		}
-		if i == 0 {
-			if n > 1 {
-				listeners = listeners[1:]
-			} else {
-				listeners = []*Listener{}
-			}
-		} else if i == n {
-			listeners = listeners[0:n]
-		} else {
-			listeners = append(listeners[0:i], listeners[i+1:]...)
-		}
-	}
-	lock.Unlock()
+	return &ListenerHandle{i: len(listeners) - 1, active: true}
 }
 
 // M searches for any Listener matching the specified path and

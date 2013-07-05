@@ -75,10 +75,10 @@ To install a listener, define a trace.ListenerFn and register it:
 
 	listener := NewListener("myListenerId", "a/b/c", trace.Error, listenerFn)
 
-	trace.Register(listener)
+	handle := trace.Register(listener)
 
 Listeners should be removed when they are no longer needed:
 
-	trace.Remove(listener)
+	handle.Remove()
 
 Note that multiple goroutines may call a trace.ListenerFn at a time.
