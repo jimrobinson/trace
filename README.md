@@ -83,8 +83,10 @@ for listener and to call the listeners:
 	import "github.com/jimrobinson/trace"
 
 	...
-		if m, ok := trace.M(path, priority); ok {
-			trace.T(m, path, priority, "%s %d", arg1, arg2)
+		traceId := "github.com/jimrobinson/xml/xmlbase"
+	...
+		if m, ok := trace.M(traceId, trace.Info); ok {
+			trace.T(m, traceId, trace.Info, "got %s %d", arg1, arg2)
 		}
 	...
 
@@ -96,7 +98,7 @@ To install a listener, define a trace.ListenerFn and register it:
 		log.Println(msg)
 	}
 
-	listener := NewListener("myListenerId", "a/b/c", trace.Error, listenerFn)
+	listener := NewListener("myListenerId", traceId, trace.Info, listenerFn)
 
 	handle := trace.Register(listener)
         ...
