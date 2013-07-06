@@ -1,7 +1,6 @@
 package trace
 
 import (
-	"strings"
 	"sync"
 	"time"
 )
@@ -36,7 +35,7 @@ func M(path string, priority Priority) (match []listenerMatch, ok bool) {
 			continue
 		}
 		if n := len(l.prefix); n > 0 {
-			if !strings.HasPrefix(path, l.prefix) {
+			if !(npath >= n && path[0:n] == l.prefix) {
 				continue
 			}
 			if npath > n && path[n] != '/' {
