@@ -7,31 +7,31 @@ import (
 )
 
 var lock = new(sync.RWMutex)
-var listeners = make([]*listener, 0)
+var registry = make([]*listener, 0)
 
 // Register installs a new listener
 func Register(prefix string, min Priority, fn ListenerFn) *listenerHandle {
 	lock.Lock()
 	defer lock.Unlock()
-	listeners = append(listeners, newListener(prefix, min, fn))
-	return &listenerHandle{i: len(listeners) - 1, active: true}
+	registry = append(registry, newListener(prefix, min, fn))
+	return &listenerHandle{i: len(registry) - 1, active: true}
 }
 
 // M searches for any listener matching the specified path and
 // priority level.  When ok is true the returned match should be
 // returned to the library via T or D.
-func M(path string, priority Priority) (match []listenerState, ok bool) {
+func M(path string, priority Priority) (match []listenerMatch, ok bool) {
 	lock.RLock()
 	defer lock.RUnlock()
 
-	if len(listeners) == 0 {
+	if len(registry) == 0 {
 		return
 	}
 
-	match = make([]listenerState, 0, len(listeners))
+	match = make([]listenerMatch, 0, len(registry))
 	npath := len(path)
 
-	for _, l := range listeners {
+	for _, l := range registry {
 		if priority < l.min {
 			continue
 		}
@@ -43,14 +43,14 @@ func M(path string, priority Priority) (match []listenerState, ok bool) {
 				continue
 			}
 		}
-		match = append(match, newListenerState(path, priority, l))
+		match = append(match, newListenerMatch(path, priority, l))
 	}
 
 	return match, len(match) > 0
 }
 
 // T logs the format and args to each listener function in match
-func T(match []listenerState, format string, args ...interface{}) {
+func T(match []listenerMatch, format string, args ...interface{}) {
 	if match != nil {
 		now := time.Now()
 		for _, m := range match {
@@ -75,16 +75,16 @@ func (h *listenerHandle) Remove() {
 	}
 	h.active = false
 
-	n := len(listeners)
+	n := len(registry)
 	if h.i == 0 {
 		if n > 1 {
-			listeners = listeners[1:]
+			registry = registry[1:]
 		} else {
-			listeners = []*listener{}
+			registry = []*listener{}
 		}
 	} else if h.i == n {
-		listeners = listeners[0:n]
+		registry = registry[0:n]
 	} else {
-		listeners = append(listeners[0:h.i], listeners[h.i+1:]...)
+		registry = append(registry[0:h.i], registry[h.i+1:]...)
 	}
 }

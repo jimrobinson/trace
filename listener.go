@@ -20,14 +20,14 @@ func newListener(prefix string, min Priority, fn ListenerFn) *listener {
 	}
 }
 
-type listenerState struct {
+type listenerMatch struct {
 	path     string
 	priority Priority
 	fn       ListenerFn
 }
 
-func newListenerState(path string, priority Priority, listener *listener) listenerState {
-	return listenerState{
+func newListenerMatch(path string, priority Priority, listener *listener) listenerMatch {
+	return listenerMatch{
 		path:     path,
 		priority: priority,
 		fn:       listener.fn,
