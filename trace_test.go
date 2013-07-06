@@ -182,8 +182,20 @@ func BenchmarkSecondListener(b *testing.B) {
 	}
 }
 
-func BenchmarkBothListeners(b *testing.B) {
+func BenchmarkTwoListeners(b *testing.B) {
 	for _, path := range []string{"/trace", "/trace/a"} {
+		handle := Register(path, Info, discardListenerFn)
+		defer handle.Remove()
+	}
+	for i := 0; i < b.N; i++ {
+		if m, ok := M("/trace/a/b", Info); ok {
+			T(m, "/trace/a/b", Info, "%d\n", i)
+		}
+	}
+}
+
+func BenchmarkThreeListeners(b *testing.B) {
+	for _, path := range []string{"/trace", "/trace/a", "/trace/b"} {
 		handle := Register(path, Info, discardListenerFn)
 		defer handle.Remove()
 	}
