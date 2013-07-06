@@ -6,28 +6,30 @@ import (
 
 type ListenerFn func(t time.Time, path string, priority Priority, format string, args ...interface{})
 
-type Listener struct {
-	Id     string   // Unique identifier for listener
-	Prefix string   // Call Fn for paths that start with this Prefix
-	Min    Priority // Call Fn at this Priority or above
-	Fn     ListenerFn
+type listener struct {
+	prefix string   // Call Fn for paths that start with this Prefix
+	min    Priority // Call Fn at this Priority or above
+	fn     ListenerFn
 }
 
-func NewListener(id, prefix string, min Priority, fn ListenerFn) *Listener {
-	return &Listener{
-		Id:     id,
-		Prefix: prefix,
-		Min:    min,
-		Fn:     fn,
+func newListener(prefix string, min Priority, fn ListenerFn) *listener {
+	return &listener{
+		prefix: prefix,
+		min:    min,
+		fn:     fn,
 	}
 }
 
-type ListenerState struct {
-	Path     string
-	Priority Priority
-	Fn       ListenerFn
+type listenerState struct {
+	path     string
+	priority Priority
+	fn       ListenerFn
 }
 
-func NewListenerState(path string, priority Priority, listener *Listener) ListenerState {
-	return ListenerState{Path: path, Priority: priority, Fn: listener.Fn}
+func newListenerState(path string, priority Priority, listener *listener) listenerState {
+	return listenerState{
+		path:     path,
+		priority: priority,
+		fn:       listener.fn,
+	}
 }

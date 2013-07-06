@@ -7,20 +7,20 @@ import (
 )
 
 var lock = new(sync.RWMutex)
-var listeners = make([]*Listener, 0)
+var listeners = make([]*listener, 0)
 
-// Register installs a new Listener
-func Register(l *Listener) *ListenerHandle {
+// Register installs a new listener
+func Register(prefix string, min Priority, fn ListenerFn) *listenerHandle {
 	lock.Lock()
 	defer lock.Unlock()
-	listeners = append(listeners, l)
-	return &ListenerHandle{i: len(listeners) - 1, active: true}
+	listeners = append(listeners, newListener(prefix, min, fn))
+	return &listenerHandle{i: len(listeners) - 1, active: true}
 }
 
-// M searches for any Listener matching the specified path and
+// M searches for any listener matching the specified path and
 // priority level.  When ok is true the returned match should be
 // returned to the library via T or D.
-func M(path string, priority Priority) (match []ListenerState, ok bool) {
+func M(path string, priority Priority) (match []listenerState, ok bool) {
 	lock.RLock()
 	defer lock.RUnlock()
 
@@ -28,45 +28,45 @@ func M(path string, priority Priority) (match []ListenerState, ok bool) {
 		return
 	}
 
-	match = make([]ListenerState, 0, len(listeners))
+	match = make([]listenerState, 0, len(listeners))
 	npath := len(path)
 
 	for _, l := range listeners {
-		if priority < l.Min {
+		if priority < l.min {
 			continue
 		}
-		if n := len(l.Prefix); n > 0 {
-			if !strings.HasPrefix(path, l.Prefix) {
+		if n := len(l.prefix); n > 0 {
+			if !strings.HasPrefix(path, l.prefix) {
 				continue
 			}
 			if npath > n && path[n] != '/' {
 				continue
 			}
 		}
-		match = append(match, NewListenerState(path, priority, l))
+		match = append(match, newListenerState(path, priority, l))
 	}
 
 	return match, len(match) > 0
 }
 
-// T calls each match Listener.Fn.
-func T(match []ListenerState, format string, args ...interface{}) {
+// T logs the format and args to each listener function in match
+func T(match []listenerState, format string, args ...interface{}) {
 	if match != nil {
 		now := time.Now()
 		for _, m := range match {
-			m.Fn(now, m.Path, m.Priority, format, args...)
+			m.fn(now, m.path, m.priority, format, args...)
 		}
 	}
 }
 
-// ListenerHandle provides a method to remove a Listener from the registry
-type ListenerHandle struct {
+// listenerHandle provides a method to remove a Listener from the registry
+type listenerHandle struct {
 	i      int
 	active bool
 }
 
-// Remove uninstalls a Listener
-func (h *ListenerHandle) Remove() {
+// Remove uninstalls a listener
+func (h *listenerHandle) Remove() {
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -80,7 +80,7 @@ func (h *ListenerHandle) Remove() {
 		if n > 1 {
 			listeners = listeners[1:]
 		} else {
-			listeners = []*Listener{}
+			listeners = []*listener{}
 		}
 	} else if h.i == n {
 		listeners = listeners[0:n]

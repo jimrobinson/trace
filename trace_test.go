@@ -74,8 +74,7 @@ func TestMT(t *testing.T) {
 		seenMsg = fmt.Sprintf(format, args...)
 	}
 
-	listener := NewListener("test", "trace", Info, handlerFn)
-	handle := Register(listener)
+	handle := Register("trace", Info, handlerFn)
 
 	tryOne := func(idx int, run test) {
 		called = false
@@ -115,8 +114,7 @@ func TestEmptyPath(t *testing.T) {
 		seen = true
 	}
 
-	listener := NewListener("test", "", Info, handlerFn)
-	handle := Register(listener)
+	handle := Register("", Info, handlerFn)
 	defer handle.Remove()
 
 	if m, ok := M("test", Info); ok {
@@ -150,8 +148,7 @@ func BenchmarkNoListeners(b *testing.B) {
 
 func BenchmarkOtherListeners(b *testing.B) {
 	for _, path := range []string{"path1", "path2"} {
-		l := NewListener(path, path, Info, discardListenerFn)
-		handle := Register(l)
+		handle := Register(path, Info, discardListenerFn)
 		defer handle.Remove()
 	}
 	for i := 0; i < b.N; i++ {
@@ -163,8 +160,7 @@ func BenchmarkOtherListeners(b *testing.B) {
 
 func BenchmarkFirstListener(b *testing.B) {
 	for _, path := range []string{"path1", "path2"} {
-		l := NewListener(path, path, Info, discardListenerFn)
-		handle := Register(l)
+		handle := Register(path, Info, discardListenerFn)
 		defer handle.Remove()
 	}
 	for i := 0; i < b.N; i++ {
@@ -176,8 +172,7 @@ func BenchmarkFirstListener(b *testing.B) {
 
 func BenchmarkSecondListener(b *testing.B) {
 	for _, path := range []string{"path1", "path2"} {
-		l := NewListener(path, path, Info, discardListenerFn)
-		handle := Register(l)
+		handle := Register(path, Info, discardListenerFn)
 		defer handle.Remove()
 	}
 	for i := 0; i < b.N; i++ {
@@ -189,8 +184,7 @@ func BenchmarkSecondListener(b *testing.B) {
 
 func BenchmarkBothListeners(b *testing.B) {
 	for _, path := range []string{"/trace", "/trace/a"} {
-		l := NewListener(path, path, Info, discardListenerFn)
-		handle := Register(l)
+		handle := Register(path, Info, discardListenerFn)
 		defer handle.Remove()
 	}
 	for i := 0; i < b.N; i++ {
