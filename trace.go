@@ -10,11 +10,11 @@ var lock = new(sync.RWMutex)
 var registry = make([]*listener, 0)
 
 // Register installs a new listener
-func Register(prefix string, min Priority, fn ListenerFn) *listenerHandle {
+func Register(prefix string, min Priority, fn ListenerFn) listenerHandle {
 	lock.Lock()
 	defer lock.Unlock()
 	registry = append(registry, newListener(prefix, min, fn))
-	return &listenerHandle{i: len(registry) - 1, active: true}
+	return listenerHandle(len(registry) - 1)
 }
 
 // M searches for any listener matching the specified path and
@@ -60,31 +60,24 @@ func T(match []listenerMatch, format string, args ...interface{}) {
 }
 
 // listenerHandle provides a method to remove a Listener from the registry
-type listenerHandle struct {
-	i      int
-	active bool
-}
+type listenerHandle int
 
 // Remove uninstalls a listener
-func (h *listenerHandle) Remove() {
+func (h listenerHandle) Remove() {
 	lock.Lock()
 	defer lock.Unlock()
 
-	if !h.active {
-		return
-	}
-	h.active = false
-
 	n := len(registry)
-	if h.i == 0 {
+	i := int(h)
+	if i == 0 {
 		if n > 1 {
 			registry = registry[1:]
 		} else {
 			registry = []*listener{}
 		}
-	} else if h.i == n {
+	} else if i == n {
 		registry = registry[0:n]
 	} else {
-		registry = append(registry[0:h.i], registry[h.i+1:]...)
+		registry = append(registry[0:i], registry[i+1:]...)
 	}
 }

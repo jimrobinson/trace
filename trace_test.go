@@ -195,7 +195,7 @@ func BenchmarkTwoListeners(b *testing.B) {
 }
 
 func BenchmarkThreeListeners(b *testing.B) {
-	for _, path := range []string{"/trace", "/trace/a", "/trace/b"} {
+	for _, path := range []string{"/trace", "/trace/a", "/trace/a/b"} {
 		handle := Register(path, Info, discardListenerFn)
 		defer handle.Remove()
 	}
