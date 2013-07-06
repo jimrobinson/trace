@@ -27,8 +27,10 @@ func M(path string, priority Priority) (match []listenerMatch, ok bool) {
 		return
 	}
 
-	match = make([]listenerMatch, 0, len(registry))
 	npath := len(path)
+
+	match = make([]listenerMatch, len(registry))
+	nmatch := 0
 
 	for _, l := range registry {
 		if priority < l.min {
@@ -42,9 +44,11 @@ func M(path string, priority Priority) (match []listenerMatch, ok bool) {
 				continue
 			}
 		}
-		match = append(match, newListenerMatch(path, priority, l))
+		match[nmatch] = newListenerMatch(path, priority, l)
+		nmatch++
 	}
 
+	match = match[0:nmatch]
 	return match, len(match) > 0
 }
 
@@ -52,8 +56,8 @@ func M(path string, priority Priority) (match []listenerMatch, ok bool) {
 func T(match []listenerMatch, format string, args ...interface{}) {
 	if match != nil {
 		now := time.Now()
-		for _, m := range match {
-			m.fn(now, m.path, m.priority, format, args...)
+		for i := range match {
+			match[i].fn(now, match[i].path, match[i].priority, format, args...)
 		}
 	}
 }
