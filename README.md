@@ -62,10 +62,15 @@ for listener and to call the listeners:
 	...
 		traceId := "github.com/jimrobinson/xml/xmlbase"
 	...
-		traceFn, traceT := trace.M(traceId, trace.Info)
+		traceFn, traceT := trace.M(traceId, trace.Trace)
+		infoFn, infoT := trace.M(traceId, trace.Info)
 	...
 		if traceT {
 			trace.T(traceFn, "got %s %d", arg1, arg2)
+		}
+	...
+		if infoT {
+			trace.T(infoFn, "got %s %d", arg1, arg2)
 		}
 	...
 
