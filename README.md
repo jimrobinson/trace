@@ -13,13 +13,20 @@ Listeners that could then act upon those logging calls.
 I was curious what the overhead would be to split out what was a one
 call method:
 
-	trace.T(<path>, <priority>, <fmt>, <args>)
+	trace.T(<listenerFn>, <fmt>, <args>)
 
 into a two-step process:
 
-	if m, ok := trace.M(<path>, <priority>); ok {
-		trace.T(m, <path>, <priority>, <fmt>, <args>)
+	traceFn, traceT := trace.M(<path>, trace.Trace);
+	
+	...
+
+	if traceT {
+		trace.T(traceFn, <fmt>, <args>)
 	}
+
+where 'traceFn/traceT' might be 'errorFn/errorT' or
+'warnFn/warnT' depending on the trace level.
 
 the idea being to not evaluate dynamic args when no listeners were
 active for the given path and priority.
@@ -55,8 +62,10 @@ for listener and to call the listeners:
 	...
 		traceId := "github.com/jimrobinson/xml/xmlbase"
 	...
-		if m, ok := trace.M(traceId, trace.Info); ok {
-			trace.T(m, "got %s %d", arg1, arg2)
+		traceFn, traceT := trace.M(traceId, trace.Info)
+	...
+		if traceT {
+			trace.T(traceFn, "got %s %d", arg1, arg2)
 		}
 	...
 
