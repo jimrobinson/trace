@@ -55,7 +55,7 @@ Usage
 -----
 
 Register a trace.Listener and then call trace.M and trace.T to test
-for listener and to call the listeners:
+for listeners and to call those listeners:
 
 	import "github.com/jimrobinson/trace"
 
