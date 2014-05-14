@@ -77,14 +77,11 @@ for listeners and to call those listeners:
 To install a listener, define a trace.ListenerFn and register it:
         import "log"
 
-        ...
-	listenerFn := func(t time.Time, path string, priority trace.Priority, msg string) {
-		log.Println(msg)
+	listenerFn := func(t time.Time, path string, priority trace.Priority, msg string, args ...interface{}) {
+		log.Printf(msg, args...)
 	}
 
-	listener := NewListener("myListenerId", traceId, trace.Info, listenerFn)
-
-	handle := trace.Register(listener)
+	handle := trace.Register("", trace.Info, listenerFn)
         ...
 
 Listeners should be removed when they are no longer needed:
