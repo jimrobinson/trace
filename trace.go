@@ -5,7 +5,10 @@ import (
 	"time"
 )
 
+// lock is a global mutex for the listener registry
 var lock = new(sync.RWMutex)
+
+// registry is a global registry of listeners
 var registry = make([]*listener, 0)
 
 // Register installs a new listener
@@ -18,7 +21,7 @@ func Register(prefix string, min Priority, fn ListenerFn) listenerHandle {
 
 // M searches for any listener matching the specified path and
 // priority level.  When ok is true the returned match should be
-// returned to the library via T or D.
+// returned to the library via functions T or D.
 func M(path string, priority Priority) (match []listenerMatch, ok bool) {
 	lock.RLock()
 	defer lock.RUnlock()
