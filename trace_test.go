@@ -205,3 +205,17 @@ func BenchmarkThreeListeners(b *testing.B) {
 		}
 	}
 }
+
+func TestDefaultFormatterFn(t *testing.T) {
+	tm, err := time.Parse(time.RFC3339, "2006-01-02T15:04:05-07:00")
+	if err != nil {
+		t.Errorf("unable to parse test input time: %v", err)
+	}
+
+	s := DefaultFormatterFn(tm, "github.com/jimrobinson/trace", Trace, "%s %d %0.2f", "hello, world!", 3, 0.009)
+	e := "[2006-01-02T15:04:05-07:00][github.com/jimrobinson/trace] hello, world! 3 0.01"
+
+	if s != e {
+		t.Errorf("expected [%s], got [%s]", e, s)
+	}
+}
