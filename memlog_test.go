@@ -98,8 +98,8 @@ func TestPriorityLogReader(t *testing.T) {
 			mu:           &sync.RWMutex{},
 		}
 
-		// test Reader w/o line limit
-		r := plog.Reader(-1)
+		// test Reader w/o line limit, descending order
+		r := plog.Reader(-1, DESC)
 		br := bufio.NewReader(r)
 
 		expected := make([]string, len(eventSet))
@@ -133,8 +133,38 @@ func TestPriorityLogReader(t *testing.T) {
 			expected = expected[1:]
 		}
 
+		// test Reader w/o line limit, ascending order
+		r = plog.Reader(-1, ASC)
+		br = bufio.NewReader(r)
+		expected = eventSet
+		for {
+			msg, cont, err := br.ReadLine()
+			if err != nil {
+				if err != io.EOF {
+					t.Error(err)
+				}
+				if len(expected) != 0 {
+					t.Errorf("expected [%s] got io.EOF", expected[0])
+				}
+				break
+			}
+			if cont {
+				t.Error("unexpected state: line length should not have been exceeded")
+				break
+			}
+			if len(expected) == 0 {
+				t.Errorf("expected io.EOF, got [%s]", string(msg))
+				break
+			}
+			if expected[0] != string(msg) {
+				t.Errorf("expected [%s] got [%s]", expected[0], string(msg))
+			}
+
+			expected = expected[1:]
+		}
+
 		// test Reader w/ line limit 1
-		r = plog.Reader(1)
+		r = plog.Reader(1, DESC)
 		br = bufio.NewReader(r)
 
 		expected = make([]string, 0)

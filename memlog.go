@@ -9,6 +9,16 @@ import (
 	"time"
 )
 
+// MemLogOrder controls the order in which the MemLog Reader returns its log events
+type MemLogReaderOrder uint8
+
+const (
+	// DESC returns log events in descending order (newest to oldest)
+	DESC MemLogReaderOrder = iota
+	// ASC returns log events ascending order (oldest to newest)
+	ASC
+)
+
 var LimitEntriesErr = fmt.Errorf("MemLogLimit.Entries must be >= 1")
 var LimitBytesErr = fmt.Errorf("MemLogLimit.Bytes must be >= 1")
 
@@ -131,9 +141,9 @@ func (mlog *MemLog) run() {
 // priority level.  If the specified priority was not defined in the
 // MemLog limits, a nil Reader will be returned.  If lines is > 0
 // then the Reader will only return up to that many lines.
-func (mlog *MemLog) Reader(priority Priority, lines int) io.Reader {
+func (mlog *MemLog) Reader(priority Priority, lines int, order MemLogReaderOrder) io.Reader {
 	if plog, ok := mlog.messages[priority]; ok {
-		return plog.Reader(lines)
+		return plog.Reader(lines, order)
 	}
 	return nil
 }
@@ -208,18 +218,24 @@ func (p *priorityLog) push(msg string) {
 // reader returns an io.Reader that contains the log entries in
 // descending order by time  If lines is > 0 then the Reader will
 // only return up to that many lines.
-func (p *priorityLog) Reader(lines int) io.Reader {
+func (p *priorityLog) Reader(lines int, order MemLogReaderOrder) io.Reader {
 	p.mu.RLock()
 	snapshot := make([]*list.Element, 0, p.messages.Len())
-	event := p.messages.Front()
-	for event != nil {
-		snapshot = append(snapshot, event)
+	e := p.messages.Front()
+	for e != nil {
+		snapshot = append(snapshot, e)
 		if len(snapshot) == lines {
 			break
 		}
-		event = event.Next()
+		e = e.Next()
 	}
 	p.mu.RUnlock()
+
+	if order == ASC && len(snapshot) > 1 {
+		for i, j := 0, len(snapshot)-1; i < j; i, j = i+1, j-1 {
+			snapshot[i], snapshot[j] = snapshot[j], snapshot[i]
+		}
+	}
 
 	return newEventsReader(snapshot)
 }
