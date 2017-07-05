@@ -5,6 +5,7 @@ import (
 	"container/list"
 	"fmt"
 	"io"
+	"strings"
 	"sync"
 	"time"
 )
@@ -240,8 +241,8 @@ func (p *priorityLog) Reader(lines int, order MemLogReaderOrder) io.Reader {
 	return newEventsReader(snapshot)
 }
 
-// eventsReader implements io.Reader for log messages, using a newline
-// to separate each log event.
+// eventsReader implements io.Reader for log messages, adding a newline
+// to separate each log event if one is not already present.
 type eventsReader struct {
 	messages []*list.Element
 	buf      *bytes.Buffer
@@ -263,8 +264,11 @@ func (r *eventsReader) Read(p []byte) (int, error) {
 			return 0, io.EOF
 		}
 		r.buf.Reset()
-		r.buf.WriteString(r.messages[0].Value.(string))
-		r.buf.WriteByte('\n')
+		s := r.messages[0].Value.(string)
+		r.buf.WriteString(s)
+		if !strings.HasSuffix(s, "\n") {
+			r.buf.WriteByte('\n')
+		}
 		r.messages = r.messages[1:]
 	}
 	return r.buf.Read(p)
