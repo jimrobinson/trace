@@ -1,6 +1,9 @@
 package trace
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Priority uint8
 
@@ -11,6 +14,25 @@ const (
 	Warn
 	Error
 )
+
+func ParsePriority(s string) (level Priority, err error) {
+	level = Error
+	switch strings.ToLower(s) {
+	case "trace":
+		level = Trace
+	case "debug":
+		level = Debug
+	case "info":
+		level = Info
+	case "warn":
+		level = Warn
+	case "error":
+		level = Error
+	default:
+		err = fmt.Errorf("valid trace priorities are: trace, debug, info, warn, or error")
+	}
+	return level, err
+}
 
 func (p Priority) String() string {
 	switch p {
