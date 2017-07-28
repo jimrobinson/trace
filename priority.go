@@ -13,6 +13,7 @@ const (
 	Info
 	Warn
 	Error
+	None
 )
 
 func ParsePriority(s string) (level Priority, err error) {
@@ -28,6 +29,8 @@ func ParsePriority(s string) (level Priority, err error) {
 		level = Warn
 	case "error":
 		level = Error
+	case "none":
+		level = None
 	default:
 		err = fmt.Errorf("valid trace priorities are: trace, debug, info, warn, or error")
 	}
@@ -46,6 +49,8 @@ func (p Priority) String() string {
 		return "Warn"
 	case Error:
 		return "Error"
+	case None:
+		return "None"
 	default:
 		return fmt.Sprintf("%d", int(p))
 	}
