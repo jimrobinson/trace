@@ -37,6 +37,25 @@ func ParsePriority(s string) (level Priority, err error) {
 	return level, err
 }
 
+func (p Priority) Next() Priority {
+	switch p {
+	case None:
+		return Error
+	case Error:
+		return Warn
+	case Warn:
+		return Info
+	case Info:
+		return Debug
+	case Debug:
+		return Trace
+	case Trace:
+		return None
+	default:
+		return None
+	}
+}
+
 func (p Priority) String() string {
 	switch p {
 	case Trace:
