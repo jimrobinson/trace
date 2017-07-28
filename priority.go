@@ -32,7 +32,7 @@ func ParsePriority(s string) (level Priority, err error) {
 	case "none":
 		level = None
 	default:
-		err = fmt.Errorf("valid trace priorities are: trace, debug, info, warn, or error")
+		err = fmt.Errorf("valid trace priorities are: trace, debug, info, warn, error, or none")
 	}
 	return level, err
 }
