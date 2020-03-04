@@ -38,13 +38,18 @@ func NewFileLogWriter(fh *os.File, fmtFn FormatterFn) (w *LogWriter, err error) 
 		return nil, fmt.Errorf("NewFileLogWriter: specified filehandle is nil")
 	}
 
+	fi, err := fh.Stat()
+	if err != nil {
+		return nil, fmt.Errorf("NewFileLogWriter: unable to stat filehandle: %v", err)
+	}
+
 	dir, name := filepath.Split(fh.Name())
 	w = &LogWriter{
 		dir:        dir,
 		name:       name,
 		useTimeFmt: false,
 		fh:         fh,
-		stat:       nil,
+		stat:       fi,
 		mu:         &sync.Mutex{},
 		fmtFn:      fmtFn,
 	}
