@@ -32,7 +32,7 @@ func TestNewLogWriter(t *testing.T) {
 		defer w.Close()
 
 		if expected != w.Name() {
-			t.Error("expected logpath [%s] got [%s]", expected, w.Name())
+			t.Errorf("expected logpath [%s] got [%s]", expected, w.Name())
 		}
 	}
 }
@@ -56,7 +56,7 @@ func TestNewTimeLogWriter(t *testing.T) {
 	defer w.Close()
 
 	if expected != w.Name() {
-		t.Error("expected logpath [%s] got [%s]", expected, w.Name())
+		t.Errorf("expected logpath [%s] got [%s]", expected, w.Name())
 	}
 }
 
@@ -89,7 +89,7 @@ func TestLogWriterCheckPath(t *testing.T) {
 		logpath := w.Name()
 		expected := filepath.Join(dir, z.Format(name))
 		if expected != logpath {
-			t.Error("expected logpath [%s] got [%s]", expected, logpath)
+			t.Errorf("expected logpath [%s] got [%s]", expected, logpath)
 			break
 		}
 	}
