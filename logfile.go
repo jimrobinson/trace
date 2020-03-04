@@ -31,6 +31,27 @@ type LogWriter struct {
 	fmtFn FormatterFn
 }
 
+// NewFileLogWriter initializes a new LogWriter using an already open *os.File
+// as the destination for output.
+func NewFileLogWriter(fh *os.File, fmtFn FormatterFn) (w *LogWriter, err error) {
+	if fh == nil {
+		return nil, fmt.Errorf("NewFileLogWriter: specified filehandle is nil")
+	}
+
+	dir, name := filepath.Split(fh.Name())
+	w = &LogWriter{
+		dir:        dir,
+		name:       name,
+		useTimeFmt: false,
+		fh:         fh,
+		stat:       nil,
+		mu:         &sync.Mutex{},
+		fmtFn:      fmtFn,
+	}
+
+	return w, nil
+}
+
 // NewLogWriter initializes a new LogWriter using a file named name
 // in directory dir.  The supplied perm is used to set the permissions
 // of the log file when it is created.  The supplied FormatterFn will
